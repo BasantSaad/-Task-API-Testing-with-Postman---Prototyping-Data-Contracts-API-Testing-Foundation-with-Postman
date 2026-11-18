@@ -1,0 +1,116 @@
+# API Contract Specification: GlobalTrade Corp User Management
+
+**Client:** GlobalTrade Corp  
+**Prepared By:** Jamal Tariq, QA Automation Lead, OmniSync Solutions  
+**Project:** User Management API Validation  
+**Target Environment:** Mock/Simulation (ReqRes Service)  
+
+---
+
+## 1. Overview and Core Concepts
+
+Before we implement the automation test suite in Postman, it is essential to understand the architectural paradigms utilized in this API contract. GlobalTrade Corp relies on standard RESTful principles for its distributed systems. 
+
+### HTTP Methods
+The API uses standardized HTTP action verbs to define the desired operation:
+*   **GET**: Used to retrieve information from the server. It should be a safe and idempotent operation (meaning it does not modify server data).
+*   **POST**: Used to submit data to the server to create a new resource. This operation changes the system state.
+
+### JSON Wire Format
+Data exchanged with the GlobalTrade API is structured in **JSON** (JavaScript Object Notation). JSON is a lightweight data-interchange format built on two universal structures:
+*   A collection of name/value pairs (objects, represented by `{}`).
+*   An ordered list of values (arrays, represented by `[]`).
+Our testing must validate both the HTTP protocol behaviors (status codes) and the structural integrity of these JSON payloads.
+
+---
+
+## 2. Environment Configuration
+
+For the prototyping phase, we are utilizing the public mock API service provided by ReqRes. Ensure you utilize Postman environments to manage this configuration so it can be swapped out easily when GlobalTrade deploys their actual Dev environment.
+
+*   **Mock Service Base URL:** `https://reqres.in`
+*   **Postman Environment Variable Requirement:** Bind the Base URL to a variable named `base_url` (e.g., `{{base_url}}`).
+
+---
+
+## 3. Data Contracts and Endpoint Specifications
+
+### Endpoint 1: Retrieve Users
+
+This endpoint retrieves a paginated list of existing users in the system.
+
+*   **Endpoint Route:** `/api/users`
+*   **HTTP Method:** `GET`
+*   **Query Parameters:** `page=2` (Append this to the URL to request the second page of records)
+*   **Required Headers:** None for this specific read operation.
+*   **Request Body:** None.
+*   **Expected Status Code:** `200 OK`
+*   **Expected Response Format:** JSON
+*   **Success Criteria:** The server should return a JSON object containing pagination metadata (`page`, `per_page`, `total`) and a `data` array containing the user objects.
+
+**Sample Expected Response Snippet:**
+```json
+{
+    "page": 2,
+    "per_page": 6,
+    "total": 12,
+    "total_pages": 2,
+    "data": [
+        {
+            "id": 7,
+            "email": "michael.lawson@reqres.in",
+            "first_name": "Michael",
+            "last_name": "Lawson",
+            "avatar": "https://reqres.in/img/faces/7-image.jpg"
+        }
+    ]
+}
+```
+
+---
+
+### Endpoint 2: Create User
+
+This endpoint provisions a new user record in the identity management system. GlobalTrade requires authentication for all state-changing operations. 
+
+*   **Endpoint Route:** `/api/users`
+*   **HTTP Method:** `POST`
+*   **Required Headers:** 
+    *   `Content-Type: application/json`
+    *   `Authorization: Bearer <token>` *(Note: For this prototype, supply a simulated token such as `Bearer gt_proto_9932abc`)*
+*   **Expected Status Code:** `201 Created`
+*   **Expected Response Format:** JSON
+
+**Request Payload:**
+The request must include a valid JSON payload containing the user's name and their organizational role (job).
+
+*Sample Request Body:*
+```json
+{
+    "name": "Alex Mercer",
+    "job": "Operations Manager"
+}
+```
+
+**Response Payload & Success Criteria:**
+The mock service will echo back the created data along with a system-generated timestamp and a unique identifier. **Critical Assertion:** Your Postman test script *must* use Chai BDD to parse the JSON response body and verify the presence of the `id` field.
+
+*Sample Expected Response Body:*
+```json
+{
+    "name": "Alex Mercer",
+    "job": "Operations Manager",
+    "id": "843",
+    "createdAt": "2023-10-25T14:32:00.123Z"
+}
+```
+
+---
+
+## 4. Deliverable Requirements
+
+Please ensure that your exported Postman collection asserts the status codes for both endpoints (`200` and `201` respectively), validates the presence of the `id` field in the POST response, and uses the `{{base_url}}` variable dynamically. 
+
+If you encounter issues parsing the JSON response in the Postman Tests tab, remember to use `pm.response.json()` to convert the wire format into a traversable JavaScript object before applying `pm.expect()` assertions.
+
+— Jamal Tariq

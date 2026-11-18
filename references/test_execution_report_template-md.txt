@@ -1,0 +1,81 @@
+# Test Execution Report: GlobalTrade User API Verification
+ 
+**Prepared for:** Jamal Tariq, QA Automation Lead (OmniSync Solutions)  
+**Client:** GlobalTrade Corp  
+**Engineer:** Basant Saadeldin / Junior AI and Automation Engineer  
+**Date:** 2026-11-18  
+ 
+---
+ 
+## Postman Workspace Setup
+ 
+**Workspace Name:** GlobalTrade API Prototype  
+**Collection Name:** GlobalTrade - User API Verification  
+**Setup Description:**  
+I created a dedicated workspace for the GlobalTrade project to isolate mock testing from other work. Inside it, I imported the collection `GlobalTrade - User API Verification`, which contains two requests (GET Retrieve Users and POST Create New User), each with automated assertions in the Tests tab. I then imported the `GlobalTrade Dev` environment, selected it as the active environment, and ran both requests against the ReqRes mock service.
+ 
+## Environment Variables Used
+ 
+* **Environment Name:** GlobalTrade Dev
+* **Variables Defined:**
+  * `base_url`: `https://reqres.in`
+  * `api_key`: `<your-api-key>` (ReqRes API key, used by the `x-api-key` header)
+* **Implementation:**  
+Both requests use `{{base_url}}` as the host (`{{base_url}}/api/users?page=2` and `{{base_url}}/api/users`). No URL is hardcoded, so the collection can be pointed at GlobalTrade's real Dev environment by changing only the environment value.
+## Test Assertions Summary
+ 
+### 1. GET - Retrieve Users
+* **Endpoint:** `GET {{base_url}}/api/users?page=2`
+* **Headers:** `x-api-key: {{api_key}}` (required by the ReqRes service)
+* **Objective:** Validate the API successfully returns a list of users.
+* **Assertions:**
+  * [x] HTTP Status Code is 200 OK
+  * *Chai BDD Snippet used:*
+```javascript
+pm.test('Verify that the retrieve users endpoint returns a 200 OK status', function () {
+    pm.response.to.have.status(200);
+    pm.expect(pm.response.code).to.equal(200);
+});
+```
+* **Execution Status:** Pass
+### 2. POST - Create New User
+* **Endpoint:** `POST {{base_url}}/api/users`
+* **Objective:** Validate that a new user can be created when a valid JSON payload and Bearer token are provided.
+* **Authentication:** Simulated Bearer Token (`Authorization: Bearer gt_proto_9932abc`) applied in Headers, alongside `Content-Type: application/json` and `x-api-key: {{api_key}}` (required by the ReqRes service).
+* **Payload Used:**
+```json
+{
+    "name": "Alex Mercer",
+    "job": "Operations Manager"
+}
+```
+* **Assertions:**
+  * [x] HTTP Status Code is 201 Created
+  * [x] Response body parsed successfully using `pm.response.json()`
+  * [x] Response JSON payload contains the `id` property
+  * *Chai BDD Snippet used:*
+```javascript
+pm.test('Verify that the user creation endpoint returns a 201 Created status', function () {
+    pm.response.to.have.status(201);
+    pm.expect(pm.response.code).to.equal(201);
+});
+ 
+pm.test('Verify that the user creation response body is valid JSON and parses into an object', function () {
+    const responseData = pm.response.json();
+    pm.expect(responseData).to.be.an('object');
+});
+ 
+pm.test('Verify that the user creation response payload contains an id property', function () {
+    const responseData = pm.response.json();
+    pm.expect(responseData).to.have.property('id');
+});
+```
+* **Execution Status:** Pass
+## Observations
+ 
+**General Notes:**  
+The ReqRes prototype responded reliably during the test run. The GET endpoint returned 200 OK, and the POST endpoint returned 201 Created with an `id` in the response body. All four assertions passed, so both endpoints meet the baseline data contract expectations.
+ 
+**Challenges & Solutions:**  
+At first, the requests returned 401 and 403 errors because ReqRes now requires an API key on every request. I solved this by storing the key in the `api_key` environment variable and adding an `x-api-key: {{api_key}}` header to both requests. I also initially had `http://` in front of `{{base_url}}`, which I fixed by using `{{base_url}}/api/users` directly. I verified the Bearer token format in the Postman Console, where the header appeared as `Authorization: Bearer gt_proto_9932abc`. To read the `id` property, I stored the parsed JSON in `const responseData = pm.response.json();` before using `pm.expect()`.
+ 
