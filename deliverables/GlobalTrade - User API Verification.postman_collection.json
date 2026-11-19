@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "12d7713f-1ae2-4f85-a6ae-80a2be483e07",
+    "_postman_id": "afbd50e0-82b3-4a23-83fa-671d33242e75",
     "name": "GlobalTrade - User API Verification",
     "description": "Verifies the GlobalTrade Corp User Management API contract (status codes, JSON wire format, Bearer auth) against the ReqRes mock service.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "60175608",
-    "_collection_link": "https://go.postman.co/collection/60175608-12d7713f-1ae2-4f85-a6ae-80a2be483e07?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/60175608-afbd50e0-82b3-4a23-83fa-671d33242e75?source=collection_link"
   },
   "item": [
     {
@@ -16,7 +16,7 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Verify that the retrieve users endpoint returns a 200 OK status', function () {\n    pm.response.to.have.status(200);\n    pm.expect(pm.response.code).to.equal(200);\n});"
+              "pm.test('Verify that the retrieve users endpoint returns a 200 OK status', function () {\n    pm.response.to.have.status(200);\n});"
             ]
           }
         }
@@ -30,7 +30,7 @@
           }
         ],
         "url": {
-          "raw": "{{base_url}}/api/users?page=2",
+          "raw": "{{base_url}}/api/users?page=2&x-api-key={{api_key}}",
           "host": [
             "{{base_url}}"
           ],
@@ -42,6 +42,10 @@
             {
               "key": "page",
               "value": "2"
+            },
+            {
+              "key": "x-api-key",
+              "value": "{{api_key}}"
             }
           ]
         }
@@ -56,22 +60,24 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('Verify that the user creation endpoint returns a 201 Created status', function () {\n    pm.response.to.have.status(201);\n    pm.expect(pm.response.code).to.equal(201);\n});\n\npm.test('Verify that the user creation response body is valid JSON and parses into an object', function () {\n    const responseData = pm.response.json();\n    pm.expect(responseData).to.be.an('object');\n});\n\npm.test('Verify that the user creation response payload contains an id property', function () {\n    const responseData = pm.response.json();\n    pm.expect(responseData).to.have.property('id');\n});"
+              "pm.test('Verify that the user creation endpoint returns a 201 Created status', function () {\n    pm.response.to.have.status(201);\n});\n\npm.test('Verify that the user creation response body is valid JSON and parses into an object', function () {\n    const responseData = pm.response.json();\n    pm.expect(responseData).to.be.an('object');\n});\n\npm.test('Verify that the user creation response payload contains an id property', function () {\n    const responseData = pm.response.json();\n    pm.expect(responseData).to.have.property('id');\n});"
             ]
           }
         }
       ],
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {}
+      },
       "request": {
         "method": "POST",
         "header": [
           {
-            "key": "Authorization",
-            "value": "{{bearer_token_0zbs}}",
-            "disabled": true
-          },
-          {
             "key": "x-api-key",
             "value": "{{api_key}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "{{bearer_token_0zbs}}"
           }
         ],
         "body": {
@@ -84,13 +90,19 @@
           }
         },
         "url": {
-          "raw": "{{base_url}}/api/users",
+          "raw": "{{base_url}}/api/users?x-api-key={{api_key}}",
           "host": [
             "{{base_url}}"
           ],
           "path": [
             "api",
             "users"
+          ],
+          "query": [
+            {
+              "key": "x-api-key",
+              "value": "{{api_key}}"
+            }
           ]
         }
       },
